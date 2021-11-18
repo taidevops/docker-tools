@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.31911.260
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yaml-updater", "yaml-updater\yaml-updater.csproj", "{0B19BBBC-6A89-4559-8F7A-C08DBAA06E15}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "file-pusher", "file-pusher\file-pusher.csproj", "{7A472646-0CF7-4AC0-A9DD-713D67E9F8EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B19BBBC-6A89-4559-8F7A-C08DBAA06E15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B19BBBC-6A89-4559-8F7A-C08DBAA06E15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B19BBBC-6A89-4559-8F7A-C08DBAA06E15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B19BBBC-6A89-4559-8F7A-C08DBAA06E15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A472646-0CF7-4AC0-A9DD-713D67E9F8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A472646-0CF7-4AC0-A9DD-713D67E9F8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A472646-0CF7-4AC0-A9DD-713D67E9F8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A472646-0CF7-4AC0-A9DD-713D67E9F8EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7D25DB6F-8D70-4B67-AF12-2511803825D1}
+	EndGlobalSection
+EndGlobal
