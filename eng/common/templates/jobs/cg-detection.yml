@@ -1,7 +1,7 @@
 jobs:
 - job: Build
-  pool:
-    vmImage: $(defaultLinuxAmd64PoolImage)
+  pool: 1ES-Host-Ubuntu
+    #vmImage: $(defaultLinuxAmd64PoolImage)
   steps:
   - script: >
       find . -name '*.csproj' | grep $(cgBuildGrepArgs) | xargs -n 1 dotnet build
