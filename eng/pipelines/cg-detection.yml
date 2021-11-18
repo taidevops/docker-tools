@@ -7,3 +7,5 @@ pr: none
 variables:
 - template: templates/variables/common.yml
 
+jobs:
+- template: ../common/templates/jobs/cg-detection.yml

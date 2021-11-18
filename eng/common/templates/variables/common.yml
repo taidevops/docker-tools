@@ -1,0 +1,5 @@
+variables:
+- name: cgBuildGrepArgs
+  value: "''"
+- name: defaultLinuxAmd64PoolImage
+  value: ubuntu-latest
