@@ -18,5 +18,5 @@ stages:
     noCache: true
     publicProjectName: ${{ variables.publicProjectName }}
     linuxAmd64Pool:
-      name: ${{ variablesdefaultLinuxAmd64PoolImage }}
+      name: ${{ variables.defaultLinuxAmd64PoolImage }}
 
