@@ -13,7 +13,7 @@ stages:
 # Build Images
 ################################################################################
 - stage: Build
-  condition: and(succeeded(), contains(variables['stages'], 'build'))
+  condition: succeeded()
   jobs:
   - template: ../jobs/test-images-linux-client.yml
     parameters:
