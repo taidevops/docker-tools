@@ -5,7 +5,7 @@ parameters:
   noCache: false
   publicProjectName: null
   linuxAmd64Pool:
-    vmImage: ubuntu-latest
+    vmImage: $(defaultLinuxAmd64PoolImage)
 
 stages:
 - template: ../build-test-publish-repo.yml

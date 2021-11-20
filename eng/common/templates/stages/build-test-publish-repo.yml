@@ -6,7 +6,7 @@ parameters:
   internalProjectName: null
 
   linuxAmd64Pool:
-    vmImage: ubuntu-latest
+    vmImage: defaultLinuxAmd64PoolImage
 stages:
 
 ################################################################################
