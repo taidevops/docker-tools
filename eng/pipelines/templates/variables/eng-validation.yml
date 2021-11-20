@@ -1,3 +1,4 @@
 variables:
+- template: build-test-publish.yml
 - name: manifest
   value: eng/tests/pipeline-validation/test-manifest.json
