@@ -11,3 +11,4 @@ steps:
 - script: echo "##vso[task.setvariable variable=artifactsPath]/artifacts"
   displayName: Define Artifacts Path Variable
   condition: and(succeeded(), ${{ parameters.condition }})
+

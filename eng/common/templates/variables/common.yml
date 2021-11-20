@@ -1,4 +1,5 @@
 variables:
+- template: docker-images.yml
 - name: cgBuildGrepArgs
   value: "''"
 - name: defaultLinuxAmd64PoolImage
