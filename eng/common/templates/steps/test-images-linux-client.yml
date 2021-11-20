@@ -15,9 +15,9 @@ steps:
 - script: >
     docker run -t -d
     -v /var/run/docker.sock:/var/run/docker.sock
-    -v $(Build.ArtifactStagingDirectory):$(artifactsPath)
+    -v $(Build.ArtifactStagingDirectory):hi
     -e RUNNING_TESTS_IN_CONTAINER=true 
-    --name $(testRunner.container)
+    --name hi
     hi
   displayName: Start Test Runner Container
   condition: and(succeeded(), ${{ parameters.condition }})
