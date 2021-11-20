@@ -18,6 +18,6 @@ steps:
     -v $(Build.ArtifactStagingDirectory):$(artifactsPath)
     -e RUNNING_TESTS_IN_CONTAINER=true 
     --name $(testRunner.container)
-    $(imageNames.testRunner.withrepo)
+    hi
   displayName: Start Test Runner Container
   condition: and(succeeded(), ${{ parameters.condition }})
