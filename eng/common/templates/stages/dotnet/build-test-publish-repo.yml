@@ -5,12 +5,12 @@ parameters:
   noCache: false
   publicProjectName: null
   linuxAmd64Pool:
-    vmImage: $(defaultLinuxAmd64PoolImage)
+    vmImage: ubuntu-latest
 
 stages:
 - template: ../build-test-publish-repo.yml
   parameters:
     noCache: ${{ parameters.noCache }}
-    publicProjectName: ${{ parameters.publicProjectName }}
+    publicProjectName: pulic
 
     linuxAmd64Pool: ${{ parameters.linuxAmd64Pool }}
