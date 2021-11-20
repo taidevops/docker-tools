@@ -7,13 +7,6 @@ parameters:
 
 jobs:
 - job: ${{ parameters.name }}
-  ${{ if eq(parameters.preBuildValidation, 'false') }}:
-    condition: and(succeeded(), ${{ parameters.matrix }})
-    dependsOn: GenerateTestMatrix
-    strategy:
-      matrix: $[ ${{ parameters.matrix }} ]
-  ${{ if eq(parameters.preBuildValidation, 'true') }}:
-    condition: succeeded()
   pool: ${{ parameters.pool }}
   timeoutInMinutes: ${{ parameters.testJobTimeout }}
   steps:
