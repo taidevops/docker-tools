@@ -18,4 +18,4 @@ stages:
     noCache: true
     publicProjectName: ${{ variables.publicProjectName }}
     linuxAmd64Pool:
-      name: $(defaultLinuxAmd64PoolImage)
+      name: 1ES-Host-Ubuntu
