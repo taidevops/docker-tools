@@ -5,4 +5,11 @@ parameters:
 steps:
 - script: |
     echo "##vso[task.setvariable variable=testRunner.container]testrunner-$(Build.BuildId)-$(System.JobId)"
+    echo "$(Build.ArtifactStagingDirectory)   $(artifactsPath)"
+  displayName: Set Test Variables
+  condition: and(succeeded(), ${{ parameters.condition }})
+#-script: >
+#    docker run -t -d
+#    -v /var/run/docker.sock:/var/run/docker.sock
+#    -v $(Build.ArtifactStagingDirectory):$(artifactsPath)
 
