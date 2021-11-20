@@ -15,7 +15,7 @@ steps:
 - script: >
     docker run -t -d
     -v /var/run/docker.sock:/var/run/docker.sock
-    -v $(Build.ArtifactStagingDirectory):hi
+    -v hi:hi
     -e RUNNING_TESTS_IN_CONTAINER=true 
     --name hi
     hi
