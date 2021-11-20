@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -32,6 +32,15 @@ namespace Microsoft.DotNet.ImageBuilder.Commands
                 CreateOption("architecture", nameof(ManifestFilterOptions.Architecture),
                     "Architecture of Dockerfiles to operate on - wildcard chars * and ? supported (default is current OS architecture)",
                     () => DockerHelper.Architecture.GetDockerName()),
+                CreateOption("os-type", nameof(ManifestFilterOptions.OsType),
+                    "OS type (linux/windows) of the Dockerfiles to build - wildcard chars * and ? supported (default is the Docker OS)",
+                    () => DockerHelper.OS.GetDockerName()),
+                CreateMultiOption<string>(OsVersionOptionName, nameof(ManifestFilterOptions.OsVersions),
+                    "OS versions of the Dockerfiles to build - wildcard chars * and ? supported (default is to build all)"),
+                CreateMultiOption<string>(PathOptionName, nameof(ManifestFilterOptions.Paths),
+                    "Directory paths containing the Dockerfiles to build - wildcard chars * and ? supported (default is to build all)"),
+                CreateMultiOption<string>("version", nameof(ManifestFilterOptions.ProductVersions),
+                    "Product versions of the Dockerfiles to build - wildcard chars * and ? supported (default is to build all)")
             };
 
         public IEnumerable<Argument> GetCliArguments() => Enumerable.Empty<Argument>();

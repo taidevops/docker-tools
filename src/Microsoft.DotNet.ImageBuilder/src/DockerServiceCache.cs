@@ -48,10 +48,10 @@ namespace Microsoft.DotNet.ImageBuilder
 
         public long GetImageSize(string image, bool isDryRun) =>
             _imageSizeCache.GetOrAdd(image, _ => _inner.GetImageSize(image, isDryRun));
-
+        
         public bool LocalImageExists(string tag, bool isDryRun) =>
             _localImageExistsCache.GetOrAdd(tag, _ => _inner.LocalImageExists(tag, isDryRun));
-
+        
         public void PullImage(string image, bool isDryRun)
         {
             _pulledImages.GetOrAdd(image, _ =>

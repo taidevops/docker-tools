@@ -1,0 +1,3 @@
+variables:
+- name: manifest
+  value: eng/tests/pipeline-validation/test-manifest.json

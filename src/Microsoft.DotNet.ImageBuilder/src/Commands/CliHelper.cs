@@ -21,6 +21,21 @@ namespace Microsoft.DotNet.ImageBuilder.Commands
                 Name = propertyName
             };
 
+        public static Option<T> CreateOption<T>(string alias, string propertyName, string description, ParseArgument<T> parseArg) =>
+            new Option<T>(FormatAlias(alias), parseArg, description: description)
+            {
+                Name = propertyName
+            };
+
+        public static Option<T> CreateOption<T>(string alias, string propertyName, string description, Func<string, T> convert,
+            T defaultValue = default!) =>
+            new Option<T>(FormatAlias(alias), description: description,
+                parseArgument: resultArg => convert(GetTokenValue(resultArg)))
+            {
+                Argument = new Argument<T>(() => defaultValue!),
+                Name = propertyName
+            };
+
         public static Option<T[]> CreateMultiOption<T>(string alias, string propertyName, string description) =>
             new Option<T[]>(FormatAlias(alias), () => Array.Empty<T>(), description)
             {
@@ -45,6 +60,8 @@ namespace Microsoft.DotNet.ImageBuilder.Commands
                 Name = propertyName,
                 AllowMultipleArgumentsPerToken = false
             };
+
+        public static string GetTokenValue(this SymbolResult symbolResult) => symbolResult.Tokens.First().Value;
 
         public static string FormatAlias(string alias) => $"--{alias}";
     }

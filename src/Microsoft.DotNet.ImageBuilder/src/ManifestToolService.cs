@@ -14,7 +14,22 @@ namespace Microsoft.DotNet.ImageBuilder
         public const string ManifestListMediaType = "application/vnd.docker.distribution.manifest.list.v2+json";
         public const string ManifestMediaType = "application/vnd.docker.distribution.manifest.v2+json";
 
-        public JArray Inspect(string image, bool isDryRun) => throw new System.NotImplementedException();
-        public void PushFromSpec(string manifestFile, bool isDryRun) => throw new System.NotImplementedException();
+        public void PushFromSpec(string manifestFile, bool isDryRun)
+        {
+            // ExecuteWithRetry because the manifest-tool fails periodically while communicating
+            // with the Docker Registry.
+            ExecuteHelper.ExecuteWithRetry("manifest-tool", $"push from-spec {manifestFile}", isDryRun);
+        }
+
+        public JArray Inspect(string image, bool isDryRun)
+        {
+            string output = ExecuteHelper.ExecuteWithRetry("manifest-tool", $"inspect {image} --raw", isDryRun);
+            if (isDryRun)
+            {
+                return new JArray();
+            }
+
+            return JsonConvert.DeserializeObject<JArray>(output);
+        }
     }
 }

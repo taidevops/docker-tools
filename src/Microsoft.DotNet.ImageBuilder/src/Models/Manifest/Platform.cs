@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -47,6 +47,35 @@ namespace Microsoft.DotNet.ImageBuilder.Models.Manifest
         [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty(Required = Required.Always)]
         public OS OS { get; set; }
+
+        [Description(
+            "The specific version of the operating system associated with the image. " +
+            "Examples: alpine3.9, bionic, nanoserver-1903."
+            )]
+        [JsonProperty(Required = Required.Always)]
+        public string OsVersion { get; set; } = string.Empty;
+
+        [Description(
+            "The set of platform-specific tags associated with the image."
+            )]
+        [JsonProperty(Required = Required.Always)]
+        public IDictionary<string, Tag> Tags { get; set; } = new Dictionary<string, Tag>();
+
+        [Description(
+            "The custom build leg groups associated with the platform."
+            )]
+        public CustomBuildLegGroup[] CustomBuildLegGroups { get; set; } = Array.Empty<CustomBuildLegGroup>();
+
+        [Description(
+            "A label which further distinguishes the architecture when it " +
+            "contains variants. For example, the ARM architecture has variants " +
+            "named v6, v7, etc."
+            )]
+        public string? Variant { get; set; }
+
+        public Platform()
+        {
+        }
     }
 }
 #nullable disable

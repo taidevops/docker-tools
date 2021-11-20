@@ -36,9 +36,9 @@ namespace Microsoft.DotNet.ImageBuilder.ViewModel
         {
             if (IncludeProductVersions?.Any() ?? false)
             {
-                string includeProductionVersionPattern = GetFilterRegexPattern(IncludeProductVersions.ToArray());
+                string includeProductVersionsPattern = GetFilterRegexPattern(IncludeProductVersions.ToArray());
                 if (resolvedProductVersion is not null &&
-                    !Regex.IsMatch(resolvedProductVersion, includeProductionVersionPattern, RegexOptions.IgnoreCase))
+                    !Regex.IsMatch(resolvedProductVersion, includeProductVersionsPattern, RegexOptions.IgnoreCase))
                 {
                     return Enumerable.Empty<Platform>();
                 }
@@ -51,7 +51,41 @@ namespace Microsoft.DotNet.ImageBuilder.ViewModel
                     Regex.IsMatch(platform.Architecture.GetDockerName(), archRegexPattern, RegexOptions.IgnoreCase));
             }
 
+            if (!string.IsNullOrEmpty(IncludeOsType))
+            {
+                string osTypeRegexPattern = GetFilterRegexPattern(IncludeOsType);
+                platforms = platforms.Where(platform =>
+                    Regex.IsMatch(platform.OS.GetDockerName(), osTypeRegexPattern, RegexOptions.IgnoreCase));
+            }
+
+            if (IncludePaths?.Any() ?? false)
+            {
+                string pathsRegexPattern = GetFilterRegexPattern(IncludePaths.ToArray());
+                platforms = platforms.Where(platform =>
+                    Regex.IsMatch(platform.Dockerfile, pathsRegexPattern, RegexOptions.IgnoreCase));
+            }
+
+            if (IncludeOsVersions?.Any() ?? false)
+            {
+                string includeOsVersionsPattern = GetFilterRegexPattern(IncludeOsVersions.ToArray());
+                platforms = platforms.Where(platform =>
+                    Regex.IsMatch(platform.OsVersion ?? string.Empty, includeOsVersionsPattern, RegexOptions.IgnoreCase));
+            }
+
             return platforms.ToArray();
+        }
+
+        public IEnumerable<Repo> GetRepos(Manifest manifest)
+        {
+            if (IncludeRepos == null || !IncludeRepos.Any())
+            {
+                return manifest.Repos;
+            }
+
+            return manifest.Repos
+                .Where(repo => IncludeRepos.Contains(repo.Name))
+                .ToArray();
         }
     }
 }
+#nullable disable

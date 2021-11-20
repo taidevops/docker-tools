@@ -1,0 +1,23 @@
+parameters:
+  linuxAmdTestJobTimeout: 60
+
+  noCache: false
+
+  internalProjectName: null
+
+  linuxAmd64Pool:
+    vmImage: $(defaultLinuxAmd64PoolImage)
+stages:
+
+################################################################################
+# Build Images
+################################################################################
+- stage: Build
+  condition: and(succeeded(), contains(variables['stages'], 'build'))
+  jobs:
+  - template: ../jobs/test-images-linux-client.yml
+    parameters:
+      name: PreBuildValidation
+      pool: ${{ parameters.linuxAmd64Pool }}
+      testJobTimeout: ${{ parameters.linuxAmdTestJobTimeout }}
+      preBuildValidation: true

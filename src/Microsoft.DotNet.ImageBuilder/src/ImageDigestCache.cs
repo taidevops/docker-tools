@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ImageBuilder
 
         public void AddDigest(string tag, string digest)
         {
-            lock (_digestCache)
+            lock(_digestCache)
             {
                 _digestCache[tag] = digest;
             }

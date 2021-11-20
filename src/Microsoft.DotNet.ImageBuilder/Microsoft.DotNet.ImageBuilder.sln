@@ -5,6 +5,8 @@ VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ImageBuilder", "src\Microsoft.DotNet.ImageBuilder.csproj", "{6D31EEB6-77C0-4605-AC75-6D0A79ACE9C3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ImageBuilder.Tests", "tests\Microsoft.DotNet.ImageBuilder.Tests.csproj", "{ED4202EA-E2A8-4730-9EFD-3F1770A7E9AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6D31EEB6-77C0-4605-AC75-6D0A79ACE9C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D31EEB6-77C0-4605-AC75-6D0A79ACE9C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D31EEB6-77C0-4605-AC75-6D0A79ACE9C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED4202EA-E2A8-4730-9EFD-3F1770A7E9AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED4202EA-E2A8-4730-9EFD-3F1770A7E9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED4202EA-E2A8-4730-9EFD-3F1770A7E9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED4202EA-E2A8-4730-9EFD-3F1770A7E9AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

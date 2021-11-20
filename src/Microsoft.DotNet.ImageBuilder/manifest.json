@@ -1,0 +1,32 @@
+{
+  "registry": "docker.io",
+  "repos": [
+    {
+      "name": "tnti/image-builder",
+      "images": [
+        {
+          "sharedTags": {
+            "latest": {},
+            "$(UniqueId)": {}
+          },
+          "platforms": [
+            {
+              "buildArgs": {
+                "RID_ARCH": "x64",
+                "MANIFEST_TOOL_ARCH": "amd64",
+                "ALPINE_TAG_SUFFIX": ""
+              },
+              "dockerfile": "Dockerfile.linux",
+              "os": "linux",
+              "osVersion": "alpine",
+              "tags": {
+                "linux-amd64": {},
+                "linux-amd64-$(UniqueId)": {}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

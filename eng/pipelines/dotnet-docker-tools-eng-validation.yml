@@ -1,0 +1,19 @@
+pr: none
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - eng/*
+    - test/*
+
+variables:
+- template: templates/variables/eng-validation.yml
+
+stages:
+- template: ../common/templates/stages/dotnet/build-test-publish-repo.yml
+  parameters:
+    noCache: true
+    publicProjectName: ${{ variables.publicProjectName }}

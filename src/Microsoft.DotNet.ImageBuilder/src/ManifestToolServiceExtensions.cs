@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.ImageBuilder
                     return digest;
                 }
             }
-
+            
             if (hasSupportedMediaType |= mediaType.HasFlag(ManifestMediaType.Manifest))
             {
                 return GetDigestOfMediaType(
