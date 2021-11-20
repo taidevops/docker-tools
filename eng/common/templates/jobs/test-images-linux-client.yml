@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix: $[ ${{ parameters.matrix }} ]
   ${{ if eq(parameters.preBuildValidation, 'true') }}:
-    condition: and(succeeded(), succeeded())
+    condition: succeeded()
   pool: ${{ parameters.pool }}
   timeoutInMinutes: ${{ parameters.testJobTimeout }}
   steps:
