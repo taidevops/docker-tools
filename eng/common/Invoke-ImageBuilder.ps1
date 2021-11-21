@@ -73,7 +73,20 @@ try {
         $containerCreated = $true
     }
     else {
-        
+        # On Windows, ImageBuilder is run locally due to limitations with running Docker client within a container.
+        $imageBuilderFolder = ".Microsoft.DotNet.ImageBuilder"
+        $imageBuilderCmd = [System.IO.Path]::Combine($imageBuilderFolder, "Microsoft.DotNet.ImageBuilder.exe")
+        if (-not (Test-Path -Path "$imageBuilderCmd" -PathType Leaf)) {
+            & ./eng/common/Get-ImageBuilder.ps1
+            Exec "docker create --name $imageBuilderContainerName ${imageNames.imagebuilder}"
+            $containerCreated = $true
+            if (Test-Path -Path $imageBuilderFolder)
+            {
+                Remove-Item -Recurse -Force -Path $imageBuilderFolder
+            }
+
+            Exec "docker cp ${imageBuilderContainerName}:/image-builder $imageBuilderFolder"
+        }
     }
 
     Exec "$imageBuilderCmd $ImageBuilderArgs"
