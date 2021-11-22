@@ -25,5 +25,6 @@ COPY --from=build-env /file-pusher/out ./
 # copy repo
 WORKDIR /repo
 COPY . ./
+RUN chmod 777 /repo
 
 ENTRYPOINT ["/file-pusher/file-pusher"]
