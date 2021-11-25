@@ -8,6 +8,11 @@
     {
       "owner": "taidevops",
       "name": "dotnet-docker",
+      "branch": "nightly"
+    },
+    {
+      "owner": "taidevops",
+      "name": "dotnet-buildtools-prereqs-docker",
       "branch": "main"
     }
   ]
