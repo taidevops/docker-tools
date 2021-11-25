@@ -16,9 +16,16 @@ stages:
     parameters:
       name: PreBuildValidation
       pool: ${{ parameters.linuxAmd64Pool }}
-  - template: ../jobs/copy-base-images.yml
+  #- template: ../jobs/copy-base-images.yml
+  #  parameters:
+  #    name: CopyBaseImages
+  #    pool: ${{ parameters.linuxAmd64Pool }}
+  #    additionalOptions: "--manifest '$(manifest)' $(manifestVariables)"
+  #    publicProjectName: ${{ parameters.publicProjectName }}
+  - template: ../jobs/generate-matrix.yml
     parameters:
-      name: CopyBaseImages
+      matrixType: ${{ parameters.buildMatrixType }}
+      name: GenerateBuildMatrix
       pool: ${{ parameters.linuxAmd64Pool }}
-      additionalOptions: "--manifest '$(manifest)' $(manifestVariables)"
-      publicProjectName: ${{ parameters.publicProjectName }}
+      customBuildLegGroupArgs: ${{ parameters.buildMatrixCustomBuildLegGroupArgs }}
+      publicVersionsRepoRef: ${{ parameters.publicVersionsRepoRef }}
