@@ -41,3 +41,18 @@ steps:
       $(imageNames.imageBuilder.withrepo)"
     displayName: Define runImageBuilderCmd Variable
     condition: and(succeeded(), ${{ parameters.condition }})
+
+  ################################################################################
+  # Setup Test Runner (Optional)
+  ################################################################################
+- ${{ if eq(parameters.setupTestRunner, 'true') }}:
+  - script: $(engCommonPath)/pull-image.sh $(imageNames.testrunner)
+    displayName: Pull Test Runner
+    condition: and(succeeded(), ${{ parameters.condition }})
+  - script: >
+      docker build
+      -t $(imageNames.testRunner.withrepo)
+      --build-arg IMAGE=$(imageNames.testrunner)
+      -f $(engCommonPath)/Dockerfile.WithRepo .
+    displayName: Build Test Runner Image
+    condition: and(succeeded(), ${{ parameters.condition }})
