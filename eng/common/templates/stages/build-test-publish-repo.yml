@@ -1,4 +1,6 @@
 parameters:
+  publicProjectName: null
+
   linuxAmd64Pool:
     vmImage: $(defaultLinuxAmd64PoolImage)
 
@@ -14,4 +16,9 @@ stages:
     parameters:
       name: PreBuildValidation
       pool: ${{ parameters.linuxAmd64Pool }}
-
+  - template: ../jobs/copy-base-images.yml
+    parameters:
+      name: CopyBaseImages
+      pool: ${{ parameters.linuxAmd64Pool }}
+      additionalOptions: "--manifest '$(manifest)' $(manifestVariables)"
+      publicProjectName: ${{ parameters.publicProjectName }}

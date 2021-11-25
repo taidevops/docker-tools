@@ -2,10 +2,12 @@
 # specific to the .NET team's infrastructure.
 
 parameters:
+  publicProjectName: null
   linuxAmd64Pool:
     vmImage: $(defaultLinuxAmd64PoolImage)
 
 stages:
 - template: ../build-test-publish-repo.yml
   parameters:
+    publicProjectName: ${{ parameters.publicProjectName }}
     linuxAmd64Pool: ${{ parameters.linuxAmd64Pool }}
