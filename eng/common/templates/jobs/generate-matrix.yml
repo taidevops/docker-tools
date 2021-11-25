@@ -10,7 +10,6 @@ jobs:
   pool: ${{ parameters.pool }}
   steps:
   - template: ../steps/init-docker-linux.yml
-  - ${{ if eq(parameters.isTestStage, true) }}:
 
   - ${{ if eq(parameters.isTestStage, false) }}:
     - script: echo "##vso[task.setvariable variable=additionalGenerateBuildMatrixOptions]"
