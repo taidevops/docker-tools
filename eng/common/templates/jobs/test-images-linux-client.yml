@@ -5,7 +5,7 @@ parameters:
 
 jobs:
 - job: ${{ parameters.name }}
-  condition: succeeded()
+  condition: and(succeeded(), ne(variables.testScriptPath, ''))
   pool: ${{ parameters.pool }}
   timeoutInMinutes: ${{ parameters.testJobTimeout }}
   steps:
