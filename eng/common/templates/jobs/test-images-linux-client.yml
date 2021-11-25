@@ -4,7 +4,7 @@ parameters:
   matrix: {}
   testJobTimeout: 60
   preBuildValidation: false
-  internalProjectName: null
+  #internalProjectName: null
 
 jobs:
 - job: ${{ parameters.name }}
@@ -21,4 +21,4 @@ jobs:
   - template: ../steps/test-images-linux-client.yml
     parameters:
       preBuildValidation: ${{ parameters.preBuildValidation }}
-      internalProjectName: ${{ parameters.internalProjectName }}
+      #internalProjectName: ${{ parameters.internalProjectName }}

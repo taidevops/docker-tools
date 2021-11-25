@@ -1,0 +1,21 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/*
+
+pr: none
+
+variables:
+- template: templates/variables/image-builder.yml
+
+stages:
+- template: ../common/templates/stages/dotnet/build-test-publish-repo.yml
+  parameters:
+    noCache: true
+    publicProjectName: ${{ variables.publicProjectName }}
+    linuxAmd64Pool:
+      name: $(defaultLinuxAmd64PoolImage)
