@@ -2,12 +2,17 @@
 # specific to the .NET team's infrastructure.
 
 parameters:
+  internalProjectName: null
   publicProjectName: null
+  linuxAmdBuildJobTimeout: 60
   linuxAmd64Pool:
     vmImage: $(defaultLinuxAmd64PoolImage)
 
 stages:
 - template: ../build-test-publish-repo.yml
   parameters:
+    internalProjectName: ${{ parameters.internalProjectName }}
     publicProjectName: ${{ parameters.publicProjectName }}
+    linuxAmdBuildJobTimeout: ${{ parameters.linuxAmdBuildJobTimeout }}
+
     linuxAmd64Pool: ${{ parameters.linuxAmd64Pool }}

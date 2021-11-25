@@ -15,6 +15,7 @@ variables:
 stages:
 - template: ../common/templates/stages/dotnet/build-test-publish-repo.yml
   parameters:
+    internalProjectName: ${{ variables.internalProjectName }}
     publicProjectName: ${{ variables.publicProjectName }}
     linuxAmd64Pool:
       name: $(defaultLinuxAmd64PoolImage)
