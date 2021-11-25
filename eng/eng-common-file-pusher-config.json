@@ -12,6 +12,11 @@
     },
     {
       "owner": "taidevops",
+      "name": "dotnet-docker",
+      "branch": "main"
+    },
+    {
+      "owner": "taidevops",
       "name": "dotnet-buildtools-prereqs-docker",
       "branch": "main"
     }
