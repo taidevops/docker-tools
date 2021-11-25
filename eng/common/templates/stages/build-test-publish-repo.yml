@@ -1,6 +1,8 @@
 parameters:
   linuxAmdBuildJobTimeout: 60
 
+  linuxAmdTestJobTimeout: 60
+
   internalProjectName: null
   publicProjectName: null
 
