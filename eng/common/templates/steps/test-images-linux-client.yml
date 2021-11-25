@@ -21,3 +21,24 @@ steps:
     $(imageNames.testRunner.withrepo)
   displayName: Start Test Runner Container
   condition: and(succeeded(), ${{ parameters.condition }})
+- script: >
+    docker exec $(testRunner.container) pwsh
+    -File $(testScriptPath)
+    -Version '$(productVersion)'
+    -OS '$(osVariant)'
+    -Architecture '$(architecture)'
+    $(optionalTestArgs)
+  displayName: Test Images
+  condition: and(succeeded(), ${{ parameters.condition }})
+- ${{ if eq(variables['System.TeamProject'], parameters.internalProjectName) }}:
+  - script: docker exec $(testRunner.container) docker logout $(acr.server)
+    displayName: Docker logout
+    condition: and(always(), ${{ parameters.condition }})
+    continueOnError: true
+- script: >
+    docker cp
+    $(testRunner.container):/repo/$(testResultsDirectory)
+    $(Common.TestResultsDirectory)/.
+  displayName: Copy Test Results
+  condition: and(always(), ${{ parameters.condition }})
+  continueOnError: true
