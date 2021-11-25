@@ -26,4 +26,4 @@ COPY --from=build-env /file-pusher/out ./
 WORKDIR /repo
 COPY . ./
 
-#ENTRYPOINT ["/file-pusher/file-pusher"]
+ENTRYPOINT ["/file-pusher/file-pusher"]
