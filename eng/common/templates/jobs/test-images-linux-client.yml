@@ -9,4 +9,4 @@ jobs:
   pool: ${{ parameters.pool }}
   timeoutInMinutes: ${{ parameters.testJobTimeout }}
   steps:
-  - template: ../steps/init-common.yml
+  - template: ../steps/init-docker-linux.yml
