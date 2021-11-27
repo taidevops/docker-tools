@@ -1,10 +1,15 @@
 parameters:
+  buildMatrixType: platformDependencyGraph
+  buildMatrixCustomBuildLegGroupArgs: ""
   linuxAmdBuildJobTimeout: 60
 
   linuxAmdTestJobTimeout: 60
 
   internalProjectName: null
   publicProjectName: null
+
+  internalVersionsRepoRef: null
+  publicVersionsRepoRef: null
 
   linuxAmd64Pool:
     vmImage: $(defaultLinuxAmd64PoolImage)
@@ -15,25 +20,27 @@ stages:
 # Build Images
 ################################################################################
 - stage: Build
-  condition: succeeded()
+  condition: and(succeeded(), contains(variables['stages'], 'build'))
   jobs:
-  - template: ../jobs/test-images-linux-client.yml
-    parameters:
-      name: PreBuildValidation
-      pool: ${{ parameters.linuxAmd64Pool }}
-      testJobTimeout: ${{ parameters.linuxAmdTestJobTimeout }}
-      preBuildValidation: true
-      internalProjectName: ${{ parameters.internalProjectName }}
+  #- template: ../jobs/test-images-linux-client.yml
+  #  parameters:
+  #    name: PreBuildValidation
+  #    pool: ${{ parameters.linuxAmd64Pool }}
+  #    testJobTimeout: ${{ parameters.linuxAmdTestJobTimeout }}
+  #    preBuildValidation: true
+  #    internalProjectName: ${{ parameters.internalProjectName }}
   #- template: ../jobs/copy-base-images.yml
   #  parameters:
   #    name: CopyBaseImages
   #    pool: ${{ parameters.linuxAmd64Pool }}
   #    additionalOptions: "--manifest '$(manifest)' $(manifestVariables)"
   #    publicProjectName: ${{ parameters.publicProjectName }}
-  #- template: ../jobs/generate-matrix.yml
-  #  parameters:
-  #    matrixType: ${{ parameters.buildMatrixType }}
-  #    name: GenerateBuildMatrix
-  #    pool: ${{ parameters.linuxAmd64Pool }}
-  #    customBuildLegGroupArgs: ${{ parameters.buildMatrixCustomBuildLegGroupArgs }}
-  #    publicVersionsRepoRef: ${{ parameters.publicVersionsRepoRef }}
+  - template: ../jobs/generate-matrix.yml
+    parameters:
+      matrixType: ${{ parameters.buildMatrixType }}
+      name: GenerateBuildMatrix
+      pool: ${{ parameters.linuxAmd64Pool }}
+      customBuildLegGroupArgs: ${{ parameters.buildMatrixCustomBuildLegGroupArgs }}
+      internalProjectName: ${{ parameters.internalProjectName }}
+      internalVersionsRepoRef: ${{ parameters.internalVersionsRepoRef }}
+      publicVersionsRepoRef: ${{ parameters.publicVersionsRepoRef }}
