@@ -13,10 +13,12 @@ parameters:
 
 jobs:
 - job: ${{ parameters.name }}
-  condition: and(${{ parameters.matrix }}, in(dependencies.PreBuildValidation.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))
+  condition: ${{ parameters.matrix }}
   dependsOn:
-  - PreBuildValidation
+  - GenerateBuildMatrix
   pool: ${{ parameters.pool }}
+  strategy:
+    matrix: $[ ${{ parameters.matrix }} ]
   timeoutInMinutes: ${{ parameters.buildJobTimeout }}
   variables:
     imageBuilderDockerRunExtraOptions: $(build.imageBuilderDockerRunExtraOptions)
@@ -24,6 +26,9 @@ jobs:
     ${{ if eq(parameters.noCache, false) }}:
       versionsBasePath: $(versionsRepoPath)/
       pipelineDisabledCache: false
+    ${{ if eq(parameters.noCache, true) }}:
+      versionsBasePath: ""
+      pipelineDisabledCache: true
   steps:
   - checkout: self
   - ${{ if and(eq(variables['System.TeamProject'], parameters.publicProjectName), eq(parameters.noCache, false)) }}:
@@ -77,7 +82,18 @@ jobs:
       echo "##vso[task.setvariable variable=imageBuilderBuildArgs]$imageBuilderBuildArgs"
     displayName: Set Image Builder Build Args
   - script: >
-      echo $(runImageBuilderCmd)
-
+      $(runImageBuilderCmd) build
+      --manifest $(manifest)
+      $(imageBuilderPaths)
+      $(osVersions)
+      --os-type $(osType)
+      --architecture $(architecture)
+      --retry
+      --source-repo $(publicGitRepoUri)
+      $(manifestVariables)
+      $(imageBuilderBuildArgs)
     displayName: Build Images
+  - publish: $(Build.ArtifactStagingDirectory)/$(legName)-image-info.json
+    artifact: $(legName)-image-info-$(System.JobAttempt)
+    displayName: Publish Image Info File Artifact
   - template: ${{ format('../steps/cleanup-docker-{0}.yml', parameters.dockerClientOS) }}

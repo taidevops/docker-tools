@@ -44,3 +44,16 @@ stages:
       internalProjectName: ${{ parameters.internalProjectName }}
       internalVersionsRepoRef: ${{ parameters.internalVersionsRepoRef }}
       publicVersionsRepoRef: ${{ parameters.publicVersionsRepoRef }}
+  - template: ../jobs/build-images.yml
+    parameters:
+      name: Linux_amd64
+      pool: ${{ parameters.linuxAmd64Pool }}
+      matrix: dependencies.GenerateBuildMatrix.outputs['matrix.LinuxAmd64']
+      dockerClientOS: linux
+      buildJobTimeout: ${{ parameters.linuxAmdBuildJobTimeout }}
+      customInitSteps: ${{ parameters.customBuildInitSteps }}
+      noCache: ${{ parameters.noCache }}
+      internalProjectName: ${{ parameters.internalProjectName }}
+      publicProjectName: ${{ parameters.publicProjectName }}
+      internalVersionsRepoRef: ${{ parameters.internalVersionsRepoRef }}
+      publicVersionsRepoRef: ${{ parameters.publicVersionsRepoRef }}
