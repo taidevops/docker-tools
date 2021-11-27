@@ -15,6 +15,7 @@ variables:
 stages:
 - template: ../common/templates/stages/dotnet/build-test-publish-repo.yml
   parameters:
+    noCache: true    
     internalProjectName: ${{ variables.internalProjectName }}
     publicProjectName: ${{ variables.publicProjectName }}
     linuxAmd64Pool:

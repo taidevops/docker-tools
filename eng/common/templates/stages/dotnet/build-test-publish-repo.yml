@@ -2,17 +2,32 @@
 # specific to the .NET team's infrastructure.
 
 parameters:
+  noCache: false
   internalProjectName: null
   publicProjectName: null
+  buildMatrixCustomBuildLegGroupArgs: ""
+  customBuildInitSteps: []
+  customPublishInitSteps: []
   linuxAmdBuildJobTimeout: 60
   linuxAmd64Pool:
     vmImage: $(defaultLinuxAmd64PoolImage)
+  buildMatrixType: platformDependencyGraph
+  testMatrixType: platformVersionedOs
 
 stages:
 - template: ../build-test-publish-repo.yml
   parameters:
+    noCache: ${{ parameters.noCache }}
     internalProjectName: ${{ parameters.internalProjectName }}
     publicProjectName: ${{ parameters.publicProjectName }}
+    buildMatrixCustomBuildLegGroupArgs: ${{ parameters.buildMatrixCustomBuildLegGroupArgs }}
+    customBuildInitSteps: ${{ parameters.customBuildInitSteps }}
+    customPublishInitSteps: ${{ parameters.customPublishInitSteps }}
     linuxAmdBuildJobTimeout: ${{ parameters.linuxAmdBuildJobTimeout }}
+    buildMatrixType: ${{ parameters.buildMatrixType }}
+    testMatrixType: ${{ parameters.testMatrixType }}
+
+    internalVersionsRepoRef: InternalVersionsRepo
+    publicVersionsRepoRef: PublicVersionsRepo
 
     linuxAmd64Pool: ${{ parameters.linuxAmd64Pool }}
