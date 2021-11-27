@@ -1,9 +1,12 @@
 parameters:
   buildMatrixType: platformDependencyGraph
   buildMatrixCustomBuildLegGroupArgs: ""
+  customBuildInitSteps: []
   linuxAmdBuildJobTimeout: 60
 
   linuxAmdTestJobTimeout: 60
+
+  noCache: false
 
   internalProjectName: null
   publicProjectName: null
