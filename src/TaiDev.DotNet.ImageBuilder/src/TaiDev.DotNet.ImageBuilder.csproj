@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Cottle" Version="2.0.4" />
+    <PackageReference Include="LibGit2Sharp" Version="0.27.0-preview-0158" />
+    <PackageReference Include="Microsoft.DotNet.VersionTools" Version="6.0.0-beta.21573.2" />
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
@@ -18,6 +20,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="TaiDev.DotNet.ImageBuilder.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\McrTags\" />
   </ItemGroup>
 
 </Project>

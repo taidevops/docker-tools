@@ -1,12 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using TaiDev.DotNet.ImageBuilder.Models.Manifest;
+using Docker = TaiDev.DotNet.ImageBuilder.Models.Docker;
 
 namespace TaiDev.DotNet.ImageBuilder;
 
@@ -20,18 +15,184 @@ public static class DockerHelper
 
     public const string DockerHubRegistry = "docker.io";
 
-    public static void ExecuteWithUser(Action action, string? username, string? password, string? server, bool isDeryRun)
+    public static void ExecuteWithUser(Action action, string? username, string? password, string? server, bool isDryRun)
     {
         bool loggedIn = false;
-        if (username is not null && password is not null)
+        if (username is not null && password is not null && server is not null)
+        {
+            DockerHelper.Login(username, password, server, isDryRun);
+            loggedIn = true;
+        }
+
+        try
+        {
+            action();
+        }
+        finally
+        {
+            if (loggedIn && server is not null)
+            {
+                DockerHelper.Logout(server, isDryRun);
+            }
+        }
     }
+
+    public static IEnumerable<string> GetImageDigests(string image, bool isDryRun)
+    {
+        string digests = ExecuteCommandWithFormat(
+            "inspect", "index .RepoDigests", "Failed to retrieve image digests", image, isDryRun);
+
+        string trimmedDigests = digests.TrimStart('[').TrimEnd(']');
+        if (trimmedDigests == string.Empty)
+        {
+            return Enumerable.Empty<string>();
+        }
+
+        return trimmedDigests.Split(' ');
+    }
+
+    public static long GetImageSize(string image, bool isDryRun)
+    {
+        string size = ExecuteCommandWithFormat(
+            "inspect", ".Size", "Failed to retrieve image size", additionalArgs: image, isDryRun: isDryRun);
+        return isDryRun ? 0 : long.Parse(size);
+    }
+
+    public static string GetRepo(string image)
+    {
+        int tagSeparator = GetTagOrDigestSeparatorIndex(image);
+        if (tagSeparator >= 0)
+        {
+            return image.Substring(0, tagSeparator);
+        }
+
+        return image;
+    }
+
+    public static bool LocalImageExists(string tag, bool isDryRun) => ResourceExists(ManagementType.Image, tag, isDryRun);
 
     public static void Login(string username, string password, string server, bool isDryRun)
     {
-        Version? clientVersion = 
+        Version? clientVersion = GetClientVersion();
+        if (clientVersion >= new Version(17, 7))
+        {
+            ProcessStartInfo startInfo = new(
+                "docker", $"login -u {username} --password-stdin {server}")
+            {
+                RedirectStandardInput = true
+            };
+            ExecuteHelper.ExecuteWithRetry(
+                startInfo,
+                process =>
+                {
+                    process.StandardInput.WriteLine(password);
+                    process.StandardInput.Close();
+                },
+                isDryRun);
+        }
+        else
+        {
+            ExecuteHelper.ExecuteWithRetry(
+                "docker",
+                $"login -u {username} -p {password} {server}",
+                isDryRun,
+                executeMessageOverride: $"login -u {username} -p ******** {server}");
+        }
     }
 
-    public static Docker
+    public static void PullImage(string image, bool isDryRun)
+    {
+        ExecuteHelper.ExecuteWithRetry("docker", $"pull {image}", isDryRun);
+    }
+
+    public static string ReplaceRepo(string image, string newRepo) =>
+        newRepo + image.Substring(GetTagOrDigestSeparatorIndex(image));
+
+    public static string GetImageArch(string image, bool isDryRun)
+    {
+        return ExecuteCommandWithFormat(
+            "inspect", ".Architecture", "Failed to retrieve image architecture", additionalArgs: image, isDryRun: isDryRun);
+    }
+
+    public static void SaveImage(string image, string tarFilePath, bool isDryRun)
+    {
+        DockerHelper.ExecuteCommand("save", "Failed to save image", $"-o {tarFilePath} {image}", isDryRun);
+    }
+
+    public static void LoadImage(string tarFilePath, bool isDryRun)
+    {
+        DockerHelper.ExecuteCommand("load", "Failed to load image", $"-i {tarFilePath}", isDryRun);
+    }
+
+    public static void CreateTag(string image, string tag, bool isDryRun)
+    {
+        DockerHelper.ExecuteCommand("tag", "Failed to create tag", $"{image} {tag}", isDryRun);
+    }
+
+    public static string GetCreatedDate(string image, bool isDryRun)
+    {
+        return ExecuteCommandWithFormat(
+            "inspect", ".Created", "Failed to retrieve created date", image, isDryRun);
+    }
+
+    public static string GetDigestSha(string digest) => digest.Substring(digest.IndexOf("@") + 1);
+
+    public static string GetDigestString(string repo, string sha) => $"{repo}@{sha}";
+
+    public static string GetImageName(string registry, string repo, string? tag = null, string? digest = null)
+    {
+        if (tag != null && digest != null)
+        {
+            throw new InvalidOperationException($"Invalid to provide both the {nameof(tag)} and {nameof(digest)} arguments.");
+        }
+
+        string imageName = $"{registry}/{repo}";
+        if (tag != null)
+        {
+            return $"{imageName}:{tag}";
+        }
+        else if (digest != null)
+        {
+            return $"{imageName}@{digest}";
+        }
+
+        return imageName;
+    }
+
+    public static string NormalizeRepo(string image)
+    {
+        string? registry = GetRegistry(image);
+        string repoAndTag = TrimRegistry(image, registry);
+
+        if ((registry is null || registry == DockerHubRegistry) && !repoAndTag.Contains('/'))
+        {
+            repoAndTag = $"library/{repoAndTag}";
+        }
+
+        if (registry is null)
+        {
+            return repoAndTag;
+        }
+
+        return $"{registry}/{repoAndTag}";
+    }
+
+    public static string TrimRegistry(string tag) => TrimRegistry(tag, GetRegistry(tag));
+
+    public static string TrimRegistry(string tag, string? registry) => tag.TrimStart($"{registry}/");
+
+    public static bool IsInRegistry(string tag, string registry) => registry is not null && tag.StartsWith(registry);
+
+    /// <remarks>
+    /// This method depends on the experimental Docker CLI `manifest` command.  As a result, this method
+    /// should only used for developer usage scenarios.
+    /// </remarks>
+    public static Docker.Manifest? InspectManifest(string image, bool isDryRun)
+    {
+        string manifest = ExecuteCommand(
+            "manifest inspect", "Failed to inspect manifest", $"{image} --verbose", isDryRun);
+        return JsonSerializer.Deserialize<Docker.Manifest>(manifest);
+    }
 
     public static string? GetRegistry(string imageName)
     {

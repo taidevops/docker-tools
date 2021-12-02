@@ -18,6 +18,8 @@ internal static class StringExtensions
         return (index == min && s1.Length == s2.Length) ? -1 : index;
     }
 
+    public static string FirstCharToUpper(this string source) => char.ToUpper(source[0]) + source.Substring(1);
+
     public static string TrimEnd(this string source, string trimString)
     {
         if (string.IsNullOrEmpty(trimString))
@@ -29,6 +31,27 @@ internal static class StringExtensions
         }
 
         return source;
+    }
+
+    public static string TrimStart(this string source, string trimString)
+    {
+        if (string.IsNullOrEmpty(trimString))
+        {
+            return source;
+        }
+
+        while (source.StartsWith(trimString))
+        {
+            source = source.Substring(trimString.Length);
+        }
+
+        return source;
+    }
+
+    public static (string Key, string Value) ParseKeyValuePair(this string value, char delimiter)
+    {
+        int firstEqualIndex = value.IndexOf(delimiter);
+        return (value.Substring(0, firstEqualIndex), value.Substring(firstEqualIndex + 1));
     }
 }
 

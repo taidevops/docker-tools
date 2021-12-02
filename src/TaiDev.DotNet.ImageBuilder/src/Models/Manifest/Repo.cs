@@ -1,0 +1,51 @@
+﻿using System.ComponentModel;
+
+namespace TaiDev.DotNet.ImageBuilder.Models.Manifest;
+
+#nullable disable
+[Description(
+    "A repository object contains metadata about a target Docker repository " +
+    "and the images to be contained in it."
+    )]
+public class Repo
+{
+    [Description(
+        "A unique identifier of the repo. This is purely within the context " +
+        "of the manifest and not exposed to Docker in any way."
+        )]
+    public string Id { get; set; }
+
+    [Description(
+        "The set of images contained in this repository."
+        )]
+    public Image[] Images { get; set; }
+
+    [Description(
+        "Relative path to the MCR tags template YAML file that is used by " +
+        "tooling to generate the tags section of the readme file."
+        )]
+    public string McrTagsMetadataTemplate { get; set; }
+
+    [Description(
+        "The name of the Docker repository where the described images are to " +
+        "be published (example: dotnet/core/runtime)."
+        )]
+    public string Name { get; set; }
+
+    [Description(
+        "Relative path to the GitHub readme Markdown file associated with the " +
+        "repository. This readme file documents the set of Docker images for " +
+        "this repository."
+        )]
+    public string Readme { get; set; }
+
+    [Description(
+        "Relative path to the template the readme is generated from."
+        )]
+    public string ReadmeTemplate { get; set; }
+
+    public Repo()
+    {
+    }
+}
+#nullable enable

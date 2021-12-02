@@ -6,6 +6,11 @@ namespace TaiDev.DotNet.ImageBuilder.ViewModel;
 #nullable disable
 public class ManifestInfo
 {
+    /// <summary>
+    /// The subet of manifest repos after applying the command line filter options.
+    /// </summary>
+    public IEnumerable<RepoInfo> FilteredRepos { get; private set; }
+
     public string Registry { get; private set; }
     public VariableHelper VariableHelper { get; set; }
 

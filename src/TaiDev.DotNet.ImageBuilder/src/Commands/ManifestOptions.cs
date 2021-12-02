@@ -24,6 +24,11 @@ public abstract class ManifestOptionsBuilder : CliOptionsBuilder
                     "Path to json file which describes the repo", "manifest.json"),
                 CreateOption<string?>("registry-override", nameof(ManifestOptions.RegistryOverride),
                     "Alternative registry which overrides the manifest"),
-
+                CreateMultiOption<string>("repo", nameof(ManifestOptions.Repos),
+                    "Repos to operate on (Default is all)"),
+                CreateOption<string?>("repo-prefix", nameof(ManifestOptions.RepoPrefix),
+                    "Prefix to add to the repo names specified in the manifest"),
+                CreateDictionaryOption("var", nameof(ManifestOptions.Variables),
+                    "Named variables to substitute into the manifest (<name>=<value>)")
             });
 }
