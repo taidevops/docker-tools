@@ -2,7 +2,6 @@
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
-#nullable disable
 [Description(
     "A tag object contains metadata about a Docker tag. It is a JSON object " +
     "with its tag name used as the attribute name."
@@ -39,4 +38,3 @@ public class Tag
     {
     }
 }
-#nullable enable

@@ -16,7 +16,7 @@ public interface IDockerService
 
     void CreateTag(string image, string tag, bool isDryRun);
 
-    string? BuildImage(
+    string BuildImage(
         string dockerfilePath,
         string buildContextPath,
         IEnumerable<string> tags,

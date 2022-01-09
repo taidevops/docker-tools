@@ -1,6 +1,5 @@
 ﻿namespace TaiDev.DotNet.ImageBuilder.Models.Docker;
 
-#nullable disable
 public partial class SchemaV2Manifest
 {
     public long SchemaVersion { get; set; }
@@ -11,4 +10,3 @@ public partial class SchemaV2Manifest
 
     public Descriptor[] Layers { get; set; }
 }
-#nullable enable

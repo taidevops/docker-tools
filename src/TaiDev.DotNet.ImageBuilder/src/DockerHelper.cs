@@ -1,8 +1,12 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using TaiDev.DotNet.ImageBuilder.Models.Manifest;
+using Newtonsoft.Json;
 using Docker = TaiDev.DotNet.ImageBuilder.Models.Docker;
 
+#nullable enable
 namespace TaiDev.DotNet.ImageBuilder;
 
 public static class DockerHelper
@@ -187,11 +191,11 @@ public static class DockerHelper
     /// This method depends on the experimental Docker CLI `manifest` command.  As a result, this method
     /// should only used for developer usage scenarios.
     /// </remarks>
-    public static Docker.Manifest? InspectManifest(string image, bool isDryRun)
+    public static Docker.Manifest InspectManifest(string image, bool isDryRun)
     {
         string manifest = ExecuteCommand(
             "manifest inspect", "Failed to inspect manifest", $"{image} --verbose", isDryRun);
-        return JsonSerializer.Deserialize<Docker.Manifest>(manifest);
+        return JsonConvert.DeserializeObject<Docker.Manifest>(manifest);
     }
 
     public static string? GetRegistry(string imageName)
@@ -262,23 +266,36 @@ public static class DockerHelper
 
     private static Architecture GetArchitecture()
     {
+        Architecture architecture;
+
         string infoArchitecture = ExecuteCommandWithFormat(
             "info", ".Architecture", "Failed to detect Docker architecture");
-
-        return infoArchitecture switch
+        switch (infoArchitecture)
         {
-            "x86_64" => Architecture.AMD64,
-            "arm" or "arm_32" or "armv7l" => Architecture.ARM,
-            "aarch64" or "arm64" => Architecture.ARM64,
-            _ => throw new PlatformNotSupportedException($"Unknown Docker Architecture '{infoArchitecture}'")
-        };
+            case "x86_64":
+                architecture = Architecture.AMD64;
+                break;
+            case "arm":
+            case "arm_32":
+            case "armv7l":
+                architecture = Architecture.ARM;
+                break;
+            case "aarch64":
+            case "arm64":
+                architecture = Architecture.ARM64;
+                break;
+            default:
+                throw new PlatformNotSupportedException($"Unknown Docker Architecture '{infoArchitecture}'");
+        }
+
+        return architecture;
     }
 
     private static string ExecuteCommand(
         string command, string errorMessage, string? additionalArgs = null, bool isDryRun = false)
     {
-        string? output = ExecuteHelper.Execute("docker", $"{command} {additionalArgs}", isDryRun, errorMessage);
-        return isDryRun ? "" : output!;
+        string output = ExecuteHelper.Execute("docker", $"{command} {additionalArgs}", isDryRun, errorMessage);
+        return isDryRun ? "" : output;
     }
 
     private static string ExecuteCommandWithFormat(
@@ -291,4 +308,4 @@ public static class DockerHelper
         Container,
     }
 }
-
+#nullable disable

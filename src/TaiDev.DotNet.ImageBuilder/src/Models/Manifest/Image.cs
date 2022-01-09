@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
-#nullable disable
 [Description("An image object contains metadata about a specific Docker image.")]
 public class Image
 {
     [Description(
         "The set of platforms that describe the platform-specific variations of the Docker image.")]
+    [JsonProperty(Required = Required.Always)]
     public Platform[] Platforms { get; set; }
 
     [Description(
@@ -26,4 +26,3 @@ public class Image
     {
     }
 }
-#nullable enable

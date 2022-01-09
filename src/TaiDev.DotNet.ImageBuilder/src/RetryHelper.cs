@@ -34,4 +34,3 @@ public static class RetryHelper
         loggerService.WriteMessage(
             $"Retry {retryCount}/{maxRetries}, retrying in {timeToNextRetry.TotalSeconds} seconds...");
 }
-

@@ -17,11 +17,20 @@ try
 
     foreach (ICommand command in commands)
     {
-        rootCliCommand.AddCommand(command.GetCliCommand());
+        //rootCliCommand.AddCommand(command.GetCliCommand());
     }
 
     Parser parser = new CommandLineBuilder(rootCliCommand)
         .UseDefaults()
+        .UseMiddleware(context =>
+        {
+            if (context.ParseResult.CommandResult.Command != rootCliCommand)
+            {
+                // Capture the Docker version and info in the output.
+                ExecuteHelper.Execute(fileName: "docker", args: "version", isDryRun: false);
+                ExecuteHelper.Execute(fileName: "docker", args: "info", isDryRun: false);
+            }
+        })
         .Build();
     return parser.Invoke(args);
 }
@@ -36,7 +45,7 @@ return result;
 
 public static class ImageBuilder
 {
-    private static CompositionContainer? s_container;
+    private static CompositionContainer s_container;
 
     public static CompositionContainer Container
     {
@@ -44,9 +53,9 @@ public static class ImageBuilder
         {
             if (s_container == null)
             {
-                string dllLocation = Assembly.GetExecutingAssembly().Location;
-                DirectoryCatalog catalog = new DirectoryCatalog(Path.GetDirectoryName(dllLocation.AsSpan()).ToString(), Path.GetFileName(dllLocation));
-                s_container = new CompositionContainer(catalog);
+                var dllLocation = Assembly.GetExecutingAssembly().Location;
+                DirectoryCatalog catalog = new DirectoryCatalog(Path.GetDirectoryName(dllLocation), Path.GetFileName(dllLocation));
+                s_container = new CompositionContainer();
             }
 
             return s_container;

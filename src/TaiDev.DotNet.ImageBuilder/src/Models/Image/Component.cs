@@ -2,6 +2,7 @@
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Image;
 
+#nullable enable
 public class Component : IComparable<Component>
 {
     public string Name { get; }
@@ -27,4 +28,4 @@ public class Component : IComparable<Component>
 
     public override string ToString() => $"{Type}:{Name}={Version}";
 }
-
+#nullable disable

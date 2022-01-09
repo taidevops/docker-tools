@@ -2,7 +2,6 @@
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
-#nullable disable
 [Description(
     "The manifest file is the primary source of metadata that drives the production " +
     "of all .NET Docker images.  It describes various attributes of the Docker images " +
@@ -37,7 +36,7 @@ public class Manifest
     [Description(
         "The set of Docker repositories described by this manifest."
         )]
-    public Repo[] Repos { get; set; }
+    public Repo[] Repos { get; set; } = Array.Empty<Repo>();
 
     [Description(
         "A set of custom variables that can be referenced in various parts of the " +
@@ -47,10 +46,9 @@ public class Manifest
         "dynamically override the value of these variables. Variables may be " +
         "referenced in other parts of the manifest by using the following syntax: " +
         "$(_VariableName_).")]
-    public IDictionary<string, string> Variables { get; set; }
+    public IDictionary<string, string> Variables { get; set; } = new Dictionary<string, string>();
 
     public Manifest()
     {
     }
 }
-#nullable enable

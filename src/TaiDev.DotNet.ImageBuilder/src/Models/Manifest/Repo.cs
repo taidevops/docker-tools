@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
-#nullable disable
 [Description(
     "A repository object contains metadata about a target Docker repository " +
     "and the images to be contained in it."
@@ -18,6 +18,7 @@ public class Repo
     [Description(
         "The set of images contained in this repository."
         )]
+    [JsonProperty(Required = Required.Always)]
     public Image[] Images { get; set; }
 
     [Description(
@@ -30,6 +31,7 @@ public class Repo
         "The name of the Docker repository where the described images are to " +
         "be published (example: dotnet/core/runtime)."
         )]
+    [JsonProperty(Required = Required.Always)]
     public string Name { get; set; }
 
     [Description(
@@ -48,4 +50,3 @@ public class Repo
     {
     }
 }
-#nullable enable

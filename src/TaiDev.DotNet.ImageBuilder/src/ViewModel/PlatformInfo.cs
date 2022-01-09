@@ -1,12 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
 namespace TaiDev.DotNet.ImageBuilder.ViewModel;
@@ -26,74 +19,238 @@ public class PlatformInfo
     private IEnumerable<string> _internalRepos = Enumerable.Empty<string>();
 
     public string BaseOsVersion { get; private set; }
-
+    public IDictionary<string, string?> BuildArgs { get; private set; } = ImmutableDictionary<string, string?>.Empty;
+    public string BuildContextPath { get; private set; }
+    public string DockerfilePath { get; private set; }
+    public string DockerfilePathRelativeToManifest { get; private set; }
+    public string? DockerfileTemplate { get; private set; }
+    public string? FinalStageFromImage { get; private set; } = string.Empty;
+    public IEnumerable<string> ExternalFromImages { get; private set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> InternalFromImages { get; private set; } = Enumerable.Empty<string>();
     public Platform Model { get; private set; }
-
+    public IEnumerable<string> OverriddenFromImages { get => _overriddenFromImages; }
+    public string FullRepoModelName { get; set; }
+    private string RepoName { get; set; }
     public IEnumerable<TagInfo> Tags { get; private set; }
+    public IDictionary<string, CustomBuildLegGroup> CustomLegGroups { get; private set; } =
+        ImmutableDictionary<string, CustomBuildLegGroup>.Empty;
+    private VariableHelper VariableHelper { get; set; }
 
-    private PlatformInfo(Platform model, string baseOsVersion)
+    private PlatformInfo(Platform model, string baseOsVersion, string fullRepoModelName, string repoName, VariableHelper variableHelper,
+        string baseDirectory)
     {
         Model = model;
         BaseOsVersion = baseOsVersion;
+        FullRepoModelName = fullRepoModelName;
+        RepoName = repoName;
+        VariableHelper = variableHelper;
+
+        string dockerfileWithBaseDir = Path.Combine(baseDirectory, model.ResolveDockerfilePath(baseDirectory));
+        DockerfilePath = PathHelper.NormalizePath(dockerfileWithBaseDir);
+        BuildContextPath = PathHelper.NormalizePath(Path.GetDirectoryName(dockerfileWithBaseDir));
+        DockerfilePathRelativeToManifest = PathHelper.TrimPath(baseDirectory, DockerfilePath);
+
+        if (model.DockerfileTemplate != null)
+        {
+            DockerfileTemplate = Path.Combine(baseDirectory, model.DockerfileTemplate);
+        }
+
+        Tags = model.Tags
+            .Select(kvp => TagInfo.Create(kvp.Key, kvp.Value, repoName, variableHelper, BuildContextPath))
+            .ToArray();
     }
 
-    public static PlatformInfo Create(Platform model) =>
+    public static PlatformInfo Create(Platform model, string fullRepoModelName, string repoName, VariableHelper variableHelper, string baseDirectory) =>
         new(
             model,
-            model.OsVersion.TrimEnd("-slim"));
+            model.OsVersion.TrimEnd("-slim"),
+            fullRepoModelName,
+            repoName,
+            variableHelper,
+            baseDirectory);
+
+    public void Initialize(IEnumerable<string> internalRepos, string registry)
+    {
+        _internalRepos = internalRepos;
+        InitializeBuildArgs();
+        InitializeFromImages();
+
+        CustomLegGroups = Model.CustomBuildLegGroups
+            .Select(group =>
+                new CustomBuildLegGroup
+                {
+                    Name = group.Name,
+                    Type = group.Type,
+                    Dependencies = group.Dependencies
+                        .Select(dependency => VariableHelper.SubstituteValues(dependency))
+                        .ToArray()
+                })
+            .ToDictionary(info => info.Name)
+        ;
+    }
+
+    private void InitializeBuildArgs()
+    {
+        if (Model.BuildArgs != null)
+        {
+            BuildArgs = Model.BuildArgs.ToDictionary(kvp => kvp.Key, kvp => VariableHelper.SubstituteValues(kvp.Value));
+        }
+    }
+
+    private void InitializeFromImages()
+    {
+        string dockerfile = File.ReadAllText(DockerfilePath);
+        IList<Match> fromMatches = FromRegex.Matches(dockerfile);
+
+        if (!fromMatches.Any())
+        {
+            throw new InvalidOperationException($"Unable to find a FROM image in {DockerfilePath}.");
+        }
+
+        IEnumerable<string> fromImages = fromMatches
+            .Select(match => match.Groups[FromImageMatchName].Value)
+            .Select(from => SubstituteOverriddenRepo(from))
+            .Select(from => SubstituteBuildArgs(from))
+            .Where(from => !IsStageReference(from, fromMatches))
+            .ToArray();
+
+        FinalStageFromImage = fromImages
+            .LastOrDefault(image => !IsFromScratchImage(image));
+
+        InternalFromImages = fromImages
+            .Where(from => IsInternalFromImage(from))
+            .ToArray();
+        ExternalFromImages = fromImages
+            .Except(InternalFromImages)
+            .Where(image => !IsFromScratchImage(image))
+            .ToArray();
+    }
+
+    private static bool IsFromScratchImage(string image) =>
+        image.Equals(ScratchIdentifier, StringComparison.OrdinalIgnoreCase);
+
+    public bool IsInternalFromImage(string fromImage)
+    {
+        return _internalRepos.Any(repo => fromImage.StartsWith($"{repo}:"));
+    }
 
     public string GetOSDisplayName()
     {
+        string displayName;
         string os = BaseOsVersion;
 
         if (Model.OS == OS.Windows)
         {
             string version = os.Split('-')[1];
-            return os switch
+            if (os.StartsWith("nanoserver"))
             {
-                string a when a.StartsWith("nanoserver") => GetWindowsVersionDisplayName("Nano Server", version),
-                string a when a.StartsWith("windowsservercore") => GetWindowsVersionDisplayName("Windows Server Core", version),
-                _ => throw new NotSupportedException($"The OS version '{os}' is not supported.")
-            };
+                displayName = GetWindowsVersionDisplayName("Nano Server", version);
+            }
+            else if (os.StartsWith("windowsservercore"))
+            {
+                displayName = GetWindowsVersionDisplayName("Windows Server Core", version);
+            }
+            else
+            {
+                throw new NotSupportedException($"The OS version '{os}' is not supported.");
+            }
         }
         else
         {
-            return os switch
+            if (os.Contains("debian"))
             {
-                string a when a.Contains("debian") => "Debian",
-                string a when a.Contains("jessie") => "Debian 8",
-                string a when a.Contains("stretch") => "Debian 9",
-                string a when a.Contains("buster") => "Debian 10",
-                string a when a.Contains("bullseye") => "Debian 11",
-                string a when a.Contains("xenial") => "Ubuntu 16.04",
-                string a when a.Contains("bionic") => "Ubuntu 18.04",
-                string a when a.Contains("disco") => "Ubuntu 19.04",
-                string a when a.Contains("focal") => "Ubuntu 20.04",
-                string a when a.Contains("hirsute") => "Ubuntu 21.04",
-                string a when a.Contains("impish") => "Ubuntu 21.10",
-                string a when a.Contains("alpine") || a.Contains("centos") || a.Contains("fedora")
-                    => FormatVersionableOsName(a, name => name.FirstCharToUpper()),
-                string a when a.Contains("cbl-mariner") => FormatVersionableOsName(a, name => "CBL-Mariner"),
-                string a when a.Contains("leap") => FormatVersionableOsName(a, name => "openSUSE Leap"),
-                _ => throw new NotSupportedException($"The OS version '{os}' is not supported.")
-            };
+                displayName = "Debian";
+            }
+            else if (os.Contains("jessie"))
+            {
+                displayName = "Debian 8";
+            }
+            else if (os.Contains("stretch"))
+            {
+                displayName = "Debian 9";
+            }
+            else if (os.Contains("buster"))
+            {
+                displayName = "Debian 10";
+            }
+            else if (os.Contains("bullseye"))
+            {
+                displayName = "Debian 11";
+            }
+            else if (os.Contains("xenial"))
+            {
+                displayName = "Ubuntu 16.04";
+            }
+            else if (os.Contains("bionic"))
+            {
+                displayName = "Ubuntu 18.04";
+            }
+            else if (os.Contains("disco"))
+            {
+                displayName = "Ubuntu 19.04";
+            }
+            else if (os.Contains("focal"))
+            {
+                displayName = "Ubuntu 20.04";
+            }
+            else if (os.Contains("hirsute"))
+            {
+                displayName = "Ubuntu 21.04";
+            }
+            else if (os.Contains("impish"))
+            {
+                displayName = "Ubuntu 21.10";
+            }
+            else if (os.Contains("alpine") || os.Contains("centos") || os.Contains("fedora"))
+            {
+                displayName = FormatVersionableOsName(os, name => name.FirstCharToUpper());
+            }
+            else if (os.Contains("cbl-mariner"))
+            {
+                displayName = FormatVersionableOsName(os, name => "CBL-Mariner");
+            }
+            else if (os.Contains("leap"))
+            {
+                displayName = FormatVersionableOsName(os, name => "openSUSE Leap");
+            }
+            else
+            {
+                throw new NotSupportedException($"The OS version '{os}' is not supported.");
+            }
         }
+
+        return displayName;
     }
 
     private static string GetWindowsVersionDisplayName(string windowsName, string version)
     {
         if (version.StartsWith("ltsc"))
+        {
             return $"{windowsName} {version.TrimStart("ltsc")}";
-        return $"{windowsName}, version {version}";
-
+        }
+        else
+        {
+            return $"{windowsName}, version {version}";
+        }
     }
+
+    public static bool AreMatchingPlatforms(ImageInfo image1, PlatformInfo platform1, ImageInfo image2, PlatformInfo platform2) =>
+        platform1.GetUniqueKey(image1) == platform2.GetUniqueKey(image2);
+
+    public string GetUniqueKey(ImageInfo parentImageInfo) =>
+        $"{DockerfilePathRelativeToManifest}-{Model.OS}-{Model.OsVersion}-{Model.Architecture}-{parentImageInfo.ProductVersion}";
 
     private static string FormatVersionableOsName(string os, Func<string, string> formatName)
     {
         (string osName, string osVersion) = GetOsVersionInfo(os);
         if (string.IsNullOrEmpty(osVersion))
+        {
             return formatName(osName);
-        return $"{formatName(osName)} {osVersion}";
+        }
+        else
+        {
+            return $"{formatName(osName)} {osVersion}";
+        }
     }
 
     private static (string Name, string Version) GetOsVersionInfo(string osVersion)
@@ -106,5 +263,55 @@ public class PlatformInfo
 
         return (osVersion, string.Empty);
     }
-}
 
+
+    private static bool IsStageReference(string fromImage, IList<Match> fromMatches)
+    {
+        bool isStageReference = false;
+
+        foreach (Match fromMatch in fromMatches)
+        {
+            if (string.Equals(fromImage, fromMatch.Groups[FromImageMatchName].Value, StringComparison.Ordinal))
+            {
+                // Stage references can only be to previous stages so once the fromImage is reached, stop searching.
+                break;
+            }
+
+            Group stageIdGroup = fromMatch.Groups[StageIdMatchName];
+            if (stageIdGroup.Success && string.Equals(fromImage, stageIdGroup.Value, StringComparison.Ordinal))
+            {
+                isStageReference = true;
+                break;
+            }
+        }
+
+        return isStageReference;
+    }
+
+    private string SubstituteBuildArgs(string instruction)
+    {
+        foreach (Match match in Regex.Matches(instruction, s_argPattern))
+        {
+            if (!BuildArgs.TryGetValue(match.Groups[ArgGroupName].Value, out string? argValue))
+            {
+                throw new InvalidOperationException(
+                    $"A value was not found for the ARG '{match.Value}' in `{DockerfilePath}`");
+            }
+
+            instruction = instruction.Replace(match.Value, argValue);
+        }
+
+        return instruction;
+    }
+
+    private string SubstituteOverriddenRepo(string from)
+    {
+        if (RepoName != FullRepoModelName && from.StartsWith($"{FullRepoModelName}:"))
+        {
+            _overriddenFromImages.Add(from);
+            from = DockerHelper.ReplaceRepo(from, RepoName);
+        }
+
+        return from;
+    }
+}

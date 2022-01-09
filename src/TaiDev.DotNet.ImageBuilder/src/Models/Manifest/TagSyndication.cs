@@ -2,7 +2,6 @@
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
-#nullable disable
 [Description(
     "A description of where a tag should be syndicated to."
     )]
@@ -18,4 +17,3 @@ public class TagSyndication
     )]
     public string[] DestinationTags { get; set; }
 }
-#nullable enable

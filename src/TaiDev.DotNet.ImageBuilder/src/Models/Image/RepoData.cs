@@ -1,13 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Image;
 
-#nullable disable
 public class RepoData : IComparable<RepoData>
 {
+    [JsonProperty(Required = Required.Always)]
     public string Repo { get; set; }
 
     public List<ImageData> Images { get; set; } = new List<ImageData>();
@@ -22,4 +20,3 @@ public class RepoData : IComparable<RepoData>
         return Repo.CompareTo(other.Repo);
     }
 }
-#nullable enable

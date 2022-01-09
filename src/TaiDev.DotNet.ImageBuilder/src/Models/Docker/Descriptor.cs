@@ -1,8 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Docker;
 
-#nullable disable
 public partial class Descriptor : IEquatable<Descriptor>
 {
     public string MediaType { get; set; }
@@ -11,10 +10,10 @@ public partial class Descriptor : IEquatable<Descriptor>
 
     public long Size { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public Platform Platform { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public Uri[] Urls { get; set; }
 
     public bool Equals(Descriptor other)
@@ -26,4 +25,3 @@ public partial class Descriptor : IEquatable<Descriptor>
 
     public override int GetHashCode() => Digest.GetHashCode();
 }
-#nullable enable

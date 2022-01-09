@@ -10,4 +10,3 @@ public class ImageArtifactDetails
 
     public List<RepoData> Repos { get; set; } = new List<RepoData>();
 }
-

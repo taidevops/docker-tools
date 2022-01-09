@@ -3,7 +3,9 @@ using System.Text;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
 
+#nullable enable
 namespace TaiDev.DotNet.ImageBuilder;
+
 public static class ExecuteHelper
 {
     private static readonly ILoggerService s_loggerService = new LoggerService();
@@ -105,27 +107,23 @@ public static class ExecuteHelper
         Process process = new Process
         {
             EnableRaisingEvents = true,
-            StartInfo = info
+            StartInfo = info,
         };
 
         DataReceivedEventHandler getDataReceivedHandler(StringBuilder stringBuilder, TextWriter outputWriter)
-        {
-            return new DataReceivedEventHandler((sender, e) =>
+            => (sender, e) =>
             {
                 string? line = e.Data;
-                if (line != null)
-                {
-                    stringBuilder.AppendLine(line);
-                    outputWriter.WriteLine(line);
-                }
-            });
-        }
+                stringBuilder.AppendLine(line);
+                outputWriter.WriteLine(line);
+            };
+        
 
         StringBuilder stdOutput = new StringBuilder();
         process.OutputDataReceived += getDataReceivedHandler(stdOutput, Console.Out);
 
         StringBuilder stdError = new StringBuilder();
-        process.ErrorDataReceived += getDataReceivedHandler(stdError, Console.Error);
+        process.ErrorDataReceived += getDataReceivedHandler(stdError, Console.Out);
 
         process.Start();
         processStartedCallback?.Invoke(process);
@@ -162,3 +160,4 @@ public static class ExecuteHelper
         public string StandardError { get; }
     }
 }
+#nullable disable

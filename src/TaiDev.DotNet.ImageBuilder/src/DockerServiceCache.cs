@@ -1,29 +1,60 @@
-﻿using TaiDev.DotNet.ImageBuilder.Models.Manifest;
+﻿using System.Collections.Concurrent;
+using TaiDev.DotNet.ImageBuilder.Models.Manifest;
 
 namespace TaiDev.DotNet.ImageBuilder;
 
+/// <summary>
 /// <summary>
 /// Caches state returned from Docker commands.
 /// </summary>
 internal class DockerServiceCache : IDockerService
 {
     private readonly IDockerService _inner;
+    private readonly ConcurrentDictionary<string, DateTime> _createdDateCache = new ConcurrentDictionary<string, DateTime>();
+    private readonly ImageDigestCache _imageDigestCache;
+    private readonly ConcurrentDictionary<string, IEnumerable<string>> _imageLayersCache = new ConcurrentDictionary<string, IEnumerable<string>>();
+    private readonly ConcurrentDictionary<string, long> _imageSizeCache = new ConcurrentDictionary<string, long>();
+    private readonly ConcurrentDictionary<string, bool> _localImageExistsCache = new ConcurrentDictionary<string, bool>();
+    private readonly ConcurrentDictionary<string, bool> _pulledImages = new ConcurrentDictionary<string, bool>();
 
     public DockerServiceCache(IDockerService inner)
     {
         _inner = inner;
-
+        _imageDigestCache = new ImageDigestCache(inner);
     }
-    public Architecture Architecture => throw new NotImplementedException();
 
-    public string? BuildImage(string dockerfilePath, string buildContextPath, IEnumerable<string> tags, IDictionary<string, string?> buildArgs, bool isRetryEnabled, bool isDryRun) => throw new NotImplementedException();
-    public void CreateTag(string image, string tag, bool isDryRun) => throw new NotImplementedException();
-    public DateTime GetCreatedDate(string image, bool isDryRun) => throw new NotImplementedException();
-    public string? GetImageDigest(string image, bool isDryRun) => throw new NotImplementedException();
-    public IEnumerable<string> GetImageManifestLayers(string image, bool isDryRun) => throw new NotImplementedException();
-    public long GetImageSize(string image, bool isDryRun) => throw new NotImplementedException();
-    public bool LocalImageExists(string tag, bool isDryRun) => throw new NotImplementedException();
-    public void PullImage(string image, bool isDryRun) => throw new NotImplementedException();
-    public void PushImage(string tag, bool isDryRun) => throw new NotImplementedException();
+    public Architecture Architecture => _inner.Architecture;
+
+    public string BuildImage(string dockerfilePath, string buildContextPath, IEnumerable<string> tags, IDictionary<string, string?> buildArgs, bool isRetryEnabled, bool isDryRun) =>
+        _inner.BuildImage(dockerfilePath, buildContextPath, tags, buildArgs, isRetryEnabled, isDryRun);
+
+    public void CreateTag(string image, string tag, bool isDryRun) =>
+        _inner.CreateTag(image, tag, isDryRun);
+
+    public DateTime GetCreatedDate(string image, bool isDryRun) =>
+        _createdDateCache.GetOrAdd(image, _ => _inner.GetCreatedDate(image, isDryRun));
+
+    public string? GetImageDigest(string image, bool isDryRun) =>
+        _imageDigestCache.GetImageDigest(image, isDryRun);
+
+    public IEnumerable<string> GetImageManifestLayers(string image, bool isDryRun) =>
+        _imageLayersCache.GetOrAdd(image, _ => _inner.GetImageManifestLayers(image, isDryRun));
+
+    public long GetImageSize(string image, bool isDryRun) =>
+        _imageSizeCache.GetOrAdd(image, _ => _inner.GetImageSize(image, isDryRun));
+
+    public bool LocalImageExists(string tag, bool isDryRun) =>
+        _localImageExistsCache.GetOrAdd(tag, _ => _inner.LocalImageExists(tag, isDryRun));
+
+    public void PullImage(string image, bool isDryRun)
+    {
+        _pulledImages.GetOrAdd(image, _ =>
+        {
+            _inner.PullImage(image, isDryRun);
+            return true;
+        });
+    }
+
+    public void PushImage(string tag, bool isDryRun) =>
+        _inner.PushImage(tag, isDryRun);
 }
-

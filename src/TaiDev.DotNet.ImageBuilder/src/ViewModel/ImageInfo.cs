@@ -29,7 +29,7 @@ public class ImageInfo
     }
 
     public static ImageInfo Create(
-        Image model, string fullRepoModelName, string repoName, ManifestFilter manifestFilter, string baseDirectory)
+        Image model, string fullRepoModelName, string repoName, ManifestFilter manifestFilter, VariableHelper variableHelper, string baseDirectory)
     {
         IEnumerable<TagInfo> sharedTags;
         if (model.SharedTags == null)
@@ -39,15 +39,25 @@ public class ImageInfo
         else
         {
             sharedTags = model.SharedTags
-                .Select(kvp => TagInfo.Create(kvp.Key, kvp.Value, repoName))
+                .Select(kvp => TagInfo.Create(kvp.Key, kvp.Value, repoName, variableHelper))
                 .ToArray();
         }
 
         IEnumerable<PlatformInfo> allPlatforms = model.Platforms
-            .Select(platform => PlatformInfo.Create)
-        string? productVersion = model.ProductVersion;
-        return new(
+            .Select(platform => PlatformInfo.Create(platform, fullRepoModelName, repoName, variableHelper, baseDirectory))
+            .ToArray();
+
+        string? productVersion = variableHelper.SubstituteValues(model.ProductVersion);
+
+        IEnumerable<Platform> filteredPlatformModels = manifestFilter.FilterPlatforms(model.Platforms, productVersion);
+        IEnumerable<PlatformInfo> filteredPlatforms = allPlatforms
+            .Where(platform => filteredPlatformModels.Contains(platform.Model));
+
+        return new ImageInfo(
             model,
-            productVersion);
+            productVersion,
+            sharedTags,
+            allPlatforms,
+            filteredPlatforms);
     }
 }

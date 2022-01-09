@@ -1,15 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Docker;
 
-#nullable disable
 public partial class Platform
 {
     public string Architecture { get; set; }
 
     public string Os { get; set; }
 
-    [JsonPropertyName("os.version")]
+    [JsonProperty("os.version")]
     public string OsVersion { get; set; }
 }
-#nullable enable

@@ -1,15 +1,15 @@
-﻿
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
 using TaiDev.DotNet.ImageBuilder.ViewModel;
+using Newtonsoft.Json;
 
 namespace TaiDev.DotNet.ImageBuilder.Models.Image;
 
-#nullable disable
 public class ImageData : IComparable<ImageData>
 {
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public string ProductVersion { get; set; }
 
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public ManifestData Manifest { get; set; }
 
     public List<PlatformData> Platforms { get; set; } = new List<PlatformData>();
@@ -64,7 +64,6 @@ public class ImageData : IComparable<ImageData>
         PlatformData otherFirstPlatform = other.Platforms
             .OrderBy(platform => platform)
             .FirstOrDefault();
-        return 1;
+        return thisFirstPlatform?.CompareTo(otherFirstPlatform) ?? 1;
     }
 }
-#nullable enable

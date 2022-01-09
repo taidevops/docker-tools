@@ -7,4 +7,3 @@ public enum Architecture
     ARM64,
     AMD64
 }
-

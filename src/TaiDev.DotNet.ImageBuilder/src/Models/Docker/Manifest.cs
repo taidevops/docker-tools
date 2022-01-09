@@ -1,6 +1,5 @@
 ﻿namespace TaiDev.DotNet.ImageBuilder.Models.Docker;
 
-#nullable disable
 public partial class Manifest
 {
     public string Ref { get; set; }
@@ -9,4 +8,3 @@ public partial class Manifest
 
     public SchemaV2Manifest SchemaV2Manifest { get; set; }
 }
-#nullable enable

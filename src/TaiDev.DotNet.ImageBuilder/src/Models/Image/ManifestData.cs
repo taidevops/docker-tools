@@ -1,7 +1,5 @@
-﻿
-namespace TaiDev.DotNet.ImageBuilder.Models.Image;
+﻿namespace TaiDev.DotNet.ImageBuilder.Models.Image;
 
-#nullable disable
 public class ManifestData
 {
     public string Digest { get; set; }
@@ -9,4 +7,3 @@ public class ManifestData
     public DateTime Created { get; set; }
     public List<string> SharedTags { get; set; } = new();
 }
-#nullable enable
